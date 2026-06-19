@@ -6,12 +6,12 @@
     <title>음식 레시피 프로그램</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Malgun Gothic', sans-serif; }
-        body { padding: 20px; background-color: #f9f9f9; color: #333; }
-        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        body { padding: 20px; background-color: #f9f9f9; color: #222; font-size: 16px; font-weight: 600; } /* 전체 기본 폰트 크기 및 두께 업그레이드 */
+        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         
         /* 상단 제어 단추 그룹 wrapper */
-        .toggle-mgmt-wrapper { margin-bottom: 12px; display: flex; justify-content: flex-start; gap: 10px; }
-        .toggle-mgmt-btn { padding: 6px 14px; background: #2e7d32; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+        .toggle-mgmt-wrapper { margin-bottom: 15px; display: flex; justify-content: flex-start; gap: 12px; }
+        .toggle-mgmt-btn { padding: 10px 18px; background: #2e7d32; color: #fff; border: none; border-radius: 4px; font-weight: 800; cursor: pointer; font-size: 15px; display: flex; align-items: center; gap: 6px; }
         .toggle-mgmt-btn:hover { background: #1b5e20; }
         
         /* 새 음식 등록 토글 버튼 전용 스타일 */
@@ -19,53 +19,53 @@
         .toggle-form-btn:hover { background: #d84315; }
 
         /* 카테고리 설정/관리 영역 */
-        .category-management { display: none; background: #eef7f2; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #c8e6c9; }
-        .mgmt-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #2e7d32; display: flex; align-items: center; gap: 5px; }
+        .category-management { display: none; background: #eef7f2; padding: 20px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #c8e6c9; }
+        .mgmt-title { font-size: 16px; font-weight: 800; margin-bottom: 12px; color: #2e7d32; display: flex; align-items: center; gap: 5px; }
         .mgmt-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 10px; }
-        .mgmt-section { flex: 1; min-width: 280px; background: #fff; padding: 12px; border-radius: 4px; border: 1px solid #ddd; }
-        .mgmt-section h4 { font-size: 13px; margin-bottom: 8px; color: #444; }
-        .mgmt-controls { display: flex; gap: 6px; margin-bottom: 8px; }
-        .mgmt-list { display: flex; flex-wrap: wrap; gap: 6px; max-height: 80px; overflow-y: auto; padding: 4px; background: #fafafa; border: 1px solid #eee; border-radius: 3px; }
-        .badge-delete { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 6px; background: #f1f1f1; border: 1px solid #ccc; border-radius: 3px; }
-        .badge-delete button { background: none; border: none; color: #c62828; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .mgmt-section { flex: 1; min-width: 280px; background: #fff; padding: 15px; border-radius: 4px; border: 1px solid #ddd; }
+        .mgmt-section h4 { font-size: 15px; font-weight: 700; margin-bottom: 10px; color: #333; }
+        .mgmt-controls { display: flex; gap: 6px; margin-bottom: 10px; }
+        .mgmt-list { display: flex; flex-wrap: wrap; gap: 6px; max-height: 100px; overflow-y: auto; padding: 6px; background: #fafafa; border: 1px solid #eee; border-radius: 3px; }
+        .badge-delete { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; padding: 4px 8px; background: #f1f1f1; border: 1px solid #ccc; border-radius: 3px; }
+        .badge-delete button { background: none; border: none; color: #c62828; font-weight: 800; cursor: pointer; font-size: 14px; }
         .badge-delete button:hover { color: #ff1744; }
 
-        /* 메뉴 등록 폼 스타일 (기본 숨김 처리) */
-        .add-menu-form { display: none; background: #f5f5f5; padding: 15px; border-radius: 6px; margin-bottom: 25px; border: 1px solid #ddd; animation: fadeIn 0.3s ease; }
-        .form-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #555; }
-        .form-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
-        .form-select, .form-input, .form-textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+        /* 메뉴 등록 폼 스타일 */
+        .add-menu-form { display: none; background: #f5f5f5; padding: 20px; border-radius: 6px; margin-bottom: 25px; border: 1px solid #ddd; animation: fadeIn 0.3s ease; }
+        .form-title { font-size: 16px; font-weight: 800; margin-bottom: 12px; color: #444; }
+        .form-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
+        .form-select, .form-input, .form-textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 15px; font-weight: 700; color: #222; }
         .form-input { flex: 1; min-width: 150px; }
-        .form-textarea { width: 100%; height: 80px; resize: none; }
-        .add-btn { padding: 8px 16px; background: #e64a19; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; margin-left: auto; }
+        .form-textarea { width: 100%; height: 100px; resize: none; font-weight: 600; }
+        .add-btn { padding: 10px 20px; background: #e64a19; color: #fff; border: none; border-radius: 4px; font-weight: 800; cursor: pointer; font-size: 15px; margin-left: auto; }
         .add-btn:hover { background: #d84315; }
-        .btn-small { padding: 6px 10px; background: #4caf50; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-small { padding: 8px 14px; background: #4caf50; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 800; }
         .btn-small:hover { background: #43a047; }
 
         /* 대분류/소분류 카테고리 스타일 */
-        .main-categories { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; border-bottom: 2px solid #cee3b7; padding-bottom: 10px; align-items: center; }
-        .cate-label { font-size: 14px; font-weight: bold; color: #558b2f; margin-right: 10px; }
-        .cate-btn { padding: 6px 14px; border: 1px solid #7cb342; background: #fff; color: #558b2f; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .main-categories { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; border-bottom: 3px solid #cee3b7; padding-bottom: 12px; align-items: center; }
+        .cate-label { font-size: 16px; font-weight: 800; color: #558b2f; margin-right: 10px; }
+        .cate-btn { padding: 8px 18px; border: 2px solid #7cb342; background: #fff; color: #558b2f; border-radius: 4px; cursor: pointer; font-weight: 800; font-size: 16px; }
         .cate-btn.active { background: #7cb342; color: #fff; }
 
-        .sub-categories { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        .sub-btn { padding: 4px 12px; border: 1px solid #ccc; background: #f1f1f1; color: #666; border-radius: 4px; cursor: pointer; font-size: 13px; }
-        .sub-btn.active { background: #fff; border-color: #e64a19; color: #e64a19; font-weight: bold; }
+        .sub-categories { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; }
+        .sub-btn { padding: 6px 16px; border: 1px solid #bbb; background: #f1f1f1; color: #444; border-radius: 4px; cursor: pointer; font-size: 15px; font-weight: 700; }
+        .sub-btn.active { background: #fff; border-color: #e64a19; color: #e64a19; font-weight: 800; border-width: 2px; }
 
         /* 검색 바 스타일 */
-        .search-container { display: flex; gap: 10px; margin-bottom: 20px; max-width: 400px; }
-        .search-input { flex: 1; padding: 8px 12px; border: 1px solid #7cb342; border-radius: 4px; outline: none; }
+        .search-container { display: flex; gap: 10px; margin-bottom: 25px; max-width: 450px; }
+        .search-input { flex: 1; padding: 10px 14px; border: 2px solid #7cb342; border-radius: 4px; outline: none; font-size: 15px; font-weight: 700; }
         
         /* 메뉴 그리드 및 카드 스타일 */
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-        .menu-card { border: 1px solid #e0e0e0; border-radius: 6px; background: #fff; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .menu-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .menu-title { font-size: 15px; font-weight: bold; margin-top: 10px; margin-bottom: 20px; min-height: 50px; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+        .menu-card { border: 1px solid #cee3b7; border-radius: 8px; background: #fff; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        .menu-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+        .menu-title { font-size: 17px; font-weight: 800; margin-top: 10px; margin-bottom: 20px; min-height: 55px; display: flex; align-items: center; justify-content: center; text-align: center; color: #111; line-height: 1.4; }
         
-        .recipe-view-btn { width: 100%; padding: 7px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 13px; color: #555; font-weight: bold; }
+        .recipe-view-btn { width: 100%; padding: 10px; background: #f5f5f5; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-size: 14px; color: #333; font-weight: 800; }
         .recipe-view-btn:hover { background: #e0e0e0; }
         
-        .no-result { grid-column: 1 / -1; text-align: center; padding: 30px 0; color: #999; font-size: 15px; }
+        .no-result { grid-column: 1 / -1; text-align: center; padding: 40px 0; color: #777; font-size: 16px; font-weight: 700; }
 
         /* 모달 팝업 스타일 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
@@ -74,34 +74,34 @@
             box-shadow: 0 5px 25px rgba(0,0,0,0.3); position: relative; animation: fadeIn 0.3s ease; display: flex; flex-direction: column; 
         }
         
-        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #7cb342; padding-bottom: 12px; margin-bottom: 12px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #7cb342; padding-bottom: 15px; margin-bottom: 15px; }
         .modal-title-area { flex: 1; margin-right: 20px; }
-        .modal-title { font-size: 26px; font-weight: bold; color: #333; }
+        .modal-title { font-size: 32px; font-weight: 800; color: #111; }
         
-        .modal-action-group { display: flex; align-items: center; gap: 8px; }
+        .modal-action-group { display: flex; align-items: center; gap: 10px; }
 
-        .edit-action-btn { padding: 6px 14px; font-size: 14px; font-weight: bold; background: #0288d1; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        .edit-action-btn { padding: 8px 16px; font-size: 15px; font-weight: 800; background: #0288d1; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
         .edit-action-btn:hover { background: #01579b; }
         .edit-action-btn.save-mode { background: #2e7d32; }
         .edit-action-btn.save-mode:hover { background: #1b5e20; }
 
-        .modal-delete-btn { padding: 6px 14px; font-size: 14px; font-weight: bold; background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; border-radius: 4px; cursor: pointer; }
+        .modal-delete-btn { padding: 8px 16px; font-size: 15px; font-weight: 800; background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; border-radius: 4px; cursor: pointer; }
         .modal-delete-btn:hover { background: #c62828; color: #fff; border-color: #c62828; }
 
-        .modal-close { font-size: 32px; cursor: pointer; color: #aaa; border: none; background: none; line-height: 1; margin-left: 10px; }
+        .modal-close { font-size: 36px; cursor: pointer; color: #aaa; border: none; background: none; line-height: 1; margin-left: 10px; font-weight: 800; }
         .modal-close:hover { color: #000; }
         
-        .modal-meta { font-size: 14px; color: #666; margin-bottom: 25px; }
-        .modal-recipe-title { font-size: 18px; font-weight: bold; margin-bottom: 12px; color: #e64a19; }
+        .modal-meta { font-size: 15px; color: #555; margin-bottom: 25px; font-weight: 700; }
+        .modal-recipe-title { font-size: 20px; font-weight: 800; margin-bottom: 15px; color: #e64a19; }
         
         .modal-recipe-content { 
-            background: #f9f9f9; padding: 25px; border-radius: 6px; font-size: 16px; line-height: 1.8; 
-            white-space: pre-wrap; border: 1px solid #eee; flex: 1; overflow-y: auto; margin-bottom: 10px;
+            background: #f9f9f9; padding: 30px; border-radius: 6px; font-size: 18px; line-height: 1.8; font-weight: 700; color: #222;
+            white-space: pre-wrap; border: 1px solid #ddd; flex: 1; overflow-y: auto; margin-bottom: 10px;
         }
 
-        .edit-input { width: 100%; padding: 8px 12px; font-size: 22px; font-weight: bold; border: 1px solid #ccc; border-radius: 4px; }
-        .edit-textarea { width: 100%; height: 100%; min-height: 250px; padding: 15px; font-size: 16px; line-height: 1.8; border: 1px solid #ccc; border-radius: 4px; resize: none; outline: none; font-family: inherit; }
-        .edit-select { padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; margin-right: 5px; }
+        .edit-input { width: 100%; padding: 10px 14px; font-size: 26px; font-weight: 800; border: 2px solid #ccc; border-radius: 4px; }
+        .edit-textarea { width: 100%; height: 100%; min-height: 250px; padding: 20px; font-size: 18px; line-height: 1.8; border: 2px solid #ccc; border-radius: 4px; resize: none; outline: none; font-family: inherit; font-weight: 700; color: #222; }
+        .edit-select { padding: 8px; font-size: 15px; border: 1px solid #ccc; border-radius: 4px; margin-right: 5px; font-weight: 700; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
@@ -113,11 +113,13 @@
 
 <div class="container">
 
+    <!-- 상단 토글 제어 단추 그룹 -->
     <div class="toggle-mgmt-wrapper">
         <button class="toggle-mgmt-btn" id="toggleMgmtBtn">⚙️ 카테고리 설정창 열기</button>
         <button class="toggle-mgmt-btn toggle-form-btn" id="toggleFormBtn">✨ 새 음식 등록창 열기</button>
     </div>
 
+    <!-- 카테고리 설정/관리 영역 -->
     <div class="category-management" id="categoryManagementZone">
         <div class="mgmt-title">⚙️ 카테고리 실시간 관리 시스템</div>
         <div class="mgmt-row">
@@ -141,6 +143,7 @@
         </div>
     </div>
 
+    <!-- 메뉴 등록 폼 영역 -->
     <div class="add-menu-form" id="addMenuFormZone">
         <div class="form-title">✨ 새 음식 레시피 등록</div>
         <div class="form-row">
@@ -215,7 +218,6 @@
     const toggleMgmtBtn = document.getElementById('toggleMgmtBtn');
     const categoryManagementZone = document.getElementById('categoryManagementZone');
     
-    // 새 음식 등록창 관련 DOM 선택자 추가
     const toggleFormBtn = document.getElementById('toggleFormBtn');
     const addMenuFormZone = document.getElementById('addMenuFormZone');
 
@@ -262,10 +264,9 @@
         mgmtMainSelect.addEventListener('change', renderMgmtSubList);
 
         toggleMgmtBtn.addEventListener('click', toggleCategoryManagementZone);
-        toggleFormBtn.addEventListener('click', toggleAddMenuFormZone); // 토글 이벤트 등록
+        toggleFormBtn.addEventListener('click', toggleAddMenuFormZone);
     }
 
-    // 카테고리 설정창 토글 함수
     function toggleCategoryManagementZone() {
         if (categoryManagementZone.style.display === 'block') {
             categoryManagementZone.style.display = 'none';
@@ -278,7 +279,6 @@
         }
     }
 
-    // 새 음식 등록창 토글 함수
     function toggleAddMenuFormZone() {
         if (addMenuFormZone.style.display === 'block') {
             addMenuFormZone.style.display = 'none';
@@ -496,7 +496,7 @@
         modalTitleArea.innerHTML = `<div class="modal-title" id="modalTitle">${item.title}</div>`;
         modalMeta.innerHTML = `${item.mainCate} > ${item.subCate}`;
         modalRecipeContent.innerHTML = item.recipe || "등록된 레시피 내용이 없습니다.";
-        modalRecipeContent.style.padding = "25px"; 
+        modalRecipeContent.style.padding = "30px"; 
     }
 
     function toggleEditMode() {
