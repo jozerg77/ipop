@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 레시피 프로그램</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Malgun Gothic', sans-serif; }
+        body { padding: 20px; background-color: #f9f9f9; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        
+        /* 상단 제어 단추 그룹 wrapper */
+        .toggle-mgmt-wrapper { margin-bottom: 12px; display: flex; justify-content: flex-start; gap: 10px; }
+        .toggle-mgmt-btn { padding: 6px 14px; background: #2e7d32; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+        .toggle-mgmt-btn:hover { background: #1b5e20; }
+        
+        /* 새 음식 등록 토글 버튼 전용 스타일 */
+        .toggle-form-btn { background: #e64a19; }
+        .toggle-form-btn:hover { background: #d84315; }
+
+        /* 카테고리 설정/관리 영역 */
+        .category-management { display: none; background: #eef7f2; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #c8e6c9; }
+        .mgmt-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #2e7d32; display: flex; align-items: center; gap: 5px; }
+        .mgmt-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 10px; }
+        .mgmt-section { flex: 1; min-width: 280px; background: #fff; padding: 12px; border-radius: 4px; border: 1px solid #ddd; }
+        .mgmt-section h4 { font-size: 13px; margin-bottom: 8px; color: #444; }
+        .mgmt-controls { display: flex; gap: 6px; margin-bottom: 8px; }
+        .mgmt-list { display: flex; flex-wrap: wrap; gap: 6px; max-height: 80px; overflow-y: auto; padding: 4px; background: #fafafa; border: 1px solid #eee; border-radius: 3px; }
+        .badge-delete { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 6px; background: #f1f1f1; border: 1px solid #ccc; border-radius: 3px; }
+        .badge-delete button { background: none; border: none; color: #c62828; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .badge-delete button:hover { color: #ff1744; }
+
+        /* 메뉴 등록 폼 스타일 (기본 숨김 처리) */
+        .add-menu-form { display: none; background: #f5f5f5; padding: 15px; border-radius: 6px; margin-bottom: 25px; border: 1px solid #ddd; animation: fadeIn 0.3s ease; }
+        .form-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #555; }
+        .form-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .form-select, .form-input, .form-textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+        .form-input { flex: 1; min-width: 150px; }
+        .form-textarea { width: 100%; height: 80px; resize: none; }
+        .add-btn { padding: 8px 16px; background: #e64a19; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; margin-left: auto; }
+        .add-btn:hover { background: #d84315; }
+        .btn-small { padding: 6px 10px; background: #4caf50; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-small:hover { background: #43a047; }
+
+        /* 대분류/소분류 카테고리 스타일 */
+        .main-categories { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; border-bottom: 2px solid #cee3b7; padding-bottom: 10px; align-items: center; }
+        .cate-label { font-size: 14px; font-weight: bold; color: #558b2f; margin-right: 10px; }
+        .cate-btn { padding: 6px 14px; border: 1px solid #7cb342; background: #fff; color: #558b2f; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .cate-btn.active { background: #7cb342; color: #fff; }
+
+        .sub-categories { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .sub-btn { padding: 4px 12px; border: 1px solid #ccc; background: #f1f1f1; color: #666; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .sub-btn.active { background: #fff; border-color: #e64a19; color: #e64a19; font-weight: bold; }
+
+        /* 검색 바 스타일 */
+        .search-container { display: flex; gap: 10px; margin-bottom: 20px; max-width: 400px; }
+        .search-input { flex: 1; padding: 8px 12px; border: 1px solid #7cb342; border-radius: 4px; outline: none; }
+        
+        /* 메뉴 그리드 및 카드 스타일 */
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .menu-card { border: 1px solid #e0e0e0; border-radius: 6px; background: #fff; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .menu-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .menu-title { font-size: 15px; font-weight: bold; margin-top: 10px; margin-bottom: 20px; min-height: 50px; display: flex; align-items: center; justify-content: center; text-align: center; }
+        
+        .recipe-view-btn { width: 100%; padding: 7px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 13px; color: #555; font-weight: bold; }
+        .recipe-view-btn:hover { background: #e0e0e0; }
+        
+        .no-result { grid-column: 1 / -1; text-align: center; padding: 30px 0; color: #999; font-size: 15px; }
+
+        /* 모달 팝업 스타일 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+        .modal-card { 
+            background: #fff; width: 95%; max-width: 1000px; height: 80vh; max-height: 90vh; border-radius: 12px; padding: 40px; 
+            box-shadow: 0 5px 25px rgba(0,0,0,0.3); position: relative; animation: fadeIn 0.3s ease; display: flex; flex-direction: column; 
+        }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #7cb342; padding-bottom: 12px; margin-bottom: 12px; }
+        .modal-title-area { flex: 1; margin-right: 20px; }
+        .modal-title { font-size: 26px; font-weight: bold; color: #333; }
+        
+        .modal-action-group { display: flex; align-items: center; gap: 8px; }
+
+        .edit-action-btn { padding: 6px 14px; font-size: 14px; font-weight: bold; background: #0288d1; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        .edit-action-btn:hover { background: #01579b; }
+        .edit-action-btn.save-mode { background: #2e7d32; }
+        .edit-action-btn.save-mode:hover { background: #1b5e20; }
+
+        .modal-delete-btn { padding: 6px 14px; font-size: 14px; font-weight: bold; background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; border-radius: 4px; cursor: pointer; }
+        .modal-delete-btn:hover { background: #c62828; color: #fff; border-color: #c62828; }
+
+        .modal-close { font-size: 32px; cursor: pointer; color: #aaa; border: none; background: none; line-height: 1; margin-left: 10px; }
+        .modal-close:hover { color: #000; }
+        
+        .modal-meta { font-size: 14px; color: #666; margin-bottom: 25px; }
+        .modal-recipe-title { font-size: 18px; font-weight: bold; margin-bottom: 12px; color: #e64a19; }
+        
+        .modal-recipe-content { 
+            background: #f9f9f9; padding: 25px; border-radius: 6px; font-size: 16px; line-height: 1.8; 
+            white-space: pre-wrap; border: 1px solid #eee; flex: 1; overflow-y: auto; margin-bottom: 10px;
+        }
+
+        .edit-input { width: 100%; padding: 8px 12px; font-size: 22px; font-weight: bold; border: 1px solid #ccc; border-radius: 4px; }
+        .edit-textarea { width: 100%; height: 100%; min-height: 250px; padding: 15px; font-size: 16px; line-height: 1.8; border: 1px solid #ccc; border-radius: 4px; resize: none; outline: none; font-family: inherit; }
+        .edit-select { padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; margin-right: 5px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="toggle-mgmt-wrapper">
+        <button class="toggle-mgmt-btn" id="toggleMgmtBtn">⚙️ 카테고리 설정창 열기</button>
+        <button class="toggle-mgmt-btn toggle-form-btn" id="toggleFormBtn">✨ 새 음식 등록창 열기</button>
+    </div>
+
+    <div class="category-management" id="categoryManagementZone">
+        <div class="mgmt-title">⚙️ 카테고리 실시간 관리 시스템</div>
+        <div class="mgmt-row">
+            <div class="mgmt-section">
+                <h4>■ 1차 카테고리 추가/삭제</h4>
+                <div class="mgmt-controls">
+                    <input type="text" class="form-input" id="addMainInput" placeholder="새 1차 카테고리명">
+                    <button class="btn-small" id="addMainBtn">추가</button>
+                </div>
+                <div class="mgmt-list" id="mgmtMainList"></div>
+            </div>
+            <div class="mgmt-section">
+                <h4>■ 2차 카테고리 추가/삭제 (선택된 1차 기준)</h4>
+                <div class="mgmt-controls">
+                    <select class="form-select" id="mgmtMainSelect"></select>
+                    <input type="text" class="form-input" id="addSubInput" placeholder="새 2차 카테고리명">
+                    <button class="btn-small" id="addSubBtn">추가</button>
+                </div>
+                <div class="mgmt-list" id="mgmtSubList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="add-menu-form" id="addMenuFormZone">
+        <div class="form-title">✨ 새 음식 레시피 등록</div>
+        <div class="form-row">
+            <select class="form-select" id="newMainCate"></select>
+            <select class="form-select" id="newSubCate"></select>
+            <input type="text" class="form-input" id="newTitle" placeholder="음식 이름을 입력하세요">
+        </div>
+        <div class="form-row">
+            <textarea class="form-textarea" id="newRecipe" placeholder="조리 방법(레시피)을 상세히 입력하세요..."></textarea>
+            <button class="add-btn" id="addMenuBtn">추가하기</button>
+        </div>
+    </div>
+
+    <div class="main-categories" id="mainCategories">
+        <span class="cate-label">대분류 카테고리:</span>
+    </div>
+
+    <div class="sub-categories" id="subCategories"></div>
+
+    <div class="search-container">
+        <input type="text" class="search-input" id="searchInput" placeholder="음식명 검색...">
+    </div>
+
+    <div class="menu-grid" id="menuGrid"></div>
+</div>
+
+<div class="modal-overlay" id="recipeModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div class="modal-title-area" id="modalTitleArea">
+                <div class="modal-title" id="modalTitle">음식 이름</div>
+            </div>
+            <div class="modal-action-group">
+                <button class="edit-action-btn" id="editActionBtn">수정</button>
+                <button class="modal-delete-btn" id="modalDeleteBtn">삭제</button>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
+            </div>
+        </div>
+        
+        <div class="modal-meta" id="modalMeta">카테고리 정보</div>
+        <div class="modal-recipe-title">📖 조리 레시피</div>
+        
+        <div class="modal-recipe-content" id="modalRecipeContent">레시피 내용이 표시됩니다.</div>
+    </div>
+</div>
+
+<script>
+    let foodData = [
+        { id: 1, mainCate: "라이스", subCate: "단품", title: "순살감자탕 정식", recipe: "1. 뚝배기에 준비된 순살 감자탕 육수와 고기를 넣고 끓입니다.\n2. 육수가 끓기 시작하면 파와 들깨가루를 듬뿍 얹습니다." },
+        { id: 2, mainCate: "라이스", subCate: "단품", title: "소시지곱빼기 잠발라야볶음밥", recipe: "1. 팬에 기름을 두르고 소시지를 노릇하게 굽습니다.\n2. 잠발라야 소스와 밥을 볶아줍니다." },
+        { id: 3, mainCate: "누들", subCate: "단품", title: "매콤 해물 짬뽕", recipe: "1. 팬에 고추기름을 두르고 야채와 해물을 볶아 불맛을 냅니다.\n2. 육수를 붓고 끓으면 면을 삶아 투하합니다." }
+    ];
+
+    let categories = {
+        "라이스": ["단품", "A세트", "B세트"],
+        "누들": ["단품", "세트"],
+        "튀김": ["단품", "사이드"],
+        "꼬치": ["단품", "세트"]
+    };
+
+    let currentMainCate = "라이스";
+    let currentSubCate = "단품";
+    let editingItemId = null; 
+    let isEditMode = false;   
+
+    // DOM 선택자
+    const mainCategoriesContainer = document.getElementById('mainCategories');
+    const subCategoriesContainer = document.getElementById('subCategories');
+    const menuGrid = document.getElementById('menuGrid');
+    const searchInput = document.getElementById('searchInput');
+    
+    const toggleMgmtBtn = document.getElementById('toggleMgmtBtn');
+    const categoryManagementZone = document.getElementById('categoryManagementZone');
+    
+    // 새 음식 등록창 관련 DOM 선택자 추가
+    const toggleFormBtn = document.getElementById('toggleFormBtn');
+    const addMenuFormZone = document.getElementById('addMenuFormZone');
+
+    const newMainCate = document.getElementById('newMainCate');
+    const newSubCate = document.getElementById('newSubCate');
+    const newTitle = document.getElementById('newTitle');
+    const newRecipe = document.getElementById('newRecipe');
+    const addMenuBtn = document.getElementById('addMenuBtn');
+
+    const addMainInput = document.getElementById('addMainInput');
+    const addMainBtn = document.getElementById('addMainBtn');
+    const mgmtMainList = document.getElementById('mgmtMainList');
+    
+    const mgmtMainSelect = document.getElementById('mgmtMainSelect');
+    const addSubInput = document.getElementById('addSubInput');
+    const addSubBtn = document.getElementById('addSubBtn');
+    const mgmtSubList = document.getElementById('mgmtSubList');
+
+    const recipeModal = document.getElementById('recipeModal');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const editActionBtn = document.getElementById('editActionBtn');
+    const modalDeleteBtn = document.getElementById('modalDeleteBtn');
+    const modalTitleArea = document.getElementById('modalTitleArea');
+    const modalMeta = document.getElementById('modalMeta');
+    const modalRecipeContent = document.getElementById('modalRecipeContent');
+
+    init();
+
+    function init() {
+        refreshCategoryUI();
+        renderMenuList();
+        
+        searchInput.addEventListener('input', renderMenuList);
+        addMenuBtn.addEventListener('click', handleAddMenu);
+        newMainCate.addEventListener('change', () => syncSubSelectOptions(newMainCate, newSubCate));
+        
+        modalCloseBtn.addEventListener('click', closeModal);
+        recipeModal.addEventListener('click', (e) => { if(e.target === recipeModal) closeModal(); });
+        editActionBtn.addEventListener('click', toggleEditMode);
+        modalDeleteBtn.addEventListener('click', handleModalDelete);
+
+        addMainBtn.addEventListener('click', addMainCategory);
+        addSubBtn.addEventListener('click', addSubCategory);
+        mgmtMainSelect.addEventListener('change', renderMgmtSubList);
+
+        toggleMgmtBtn.addEventListener('click', toggleCategoryManagementZone);
+        toggleFormBtn.addEventListener('click', toggleAddMenuFormZone); // 토글 이벤트 등록
+    }
+
+    // 카테고리 설정창 토글 함수
+    function toggleCategoryManagementZone() {
+        if (categoryManagementZone.style.display === 'block') {
+            categoryManagementZone.style.display = 'none';
+            toggleMgmtBtn.textContent = '⚙️ 카테고리 설정창 열기';
+            toggleMgmtBtn.style.background = '#2e7d32';
+        } else {
+            categoryManagementZone.style.display = 'block';
+            toggleMgmtBtn.textContent = '❌ 카테고리 설정창 닫기';
+            toggleMgmtBtn.style.background = '#757575';
+        }
+    }
+
+    // 새 음식 등록창 토글 함수
+    function toggleAddMenuFormZone() {
+        if (addMenuFormZone.style.display === 'block') {
+            addMenuFormZone.style.display = 'none';
+            toggleFormBtn.textContent = '✨ 새 음식 등록창 열기';
+            toggleFormBtn.style.background = '#e64a19';
+        } else {
+            addMenuFormZone.style.display = 'block';
+            toggleFormBtn.textContent = '❌ 새 음식 등록창 닫기';
+            toggleFormBtn.style.background = '#757575';
+        }
+    }
+
+    function refreshCategoryUI() {
+        const mainKeys = Object.keys(categories);
+        if (mainKeys.length > 0 && !categories[currentMainCate]) {
+            currentMainCate = mainKeys[0];
+            currentSubCate = categories[currentMainCate][0] || "";
+        } else if (mainKeys.length > 0 && !categories[currentMainCate].includes(currentSubCate)) {
+            currentSubCate = categories[currentMainCate][0] || "";
+        } else if (mainKeys.length === 0) {
+            currentMainCate = ""; currentSubCate = "";
+        }
+
+        renderMainCategoriesNav();
+        renderSubCategoriesNav();
+        renderMgmtMainList();
+        renderMgmtSubList();
+        syncFormSelectOptions();
+    }
+
+    function addMainCategory() {
+        const value = addMainInput.value.trim();
+        if(!value) return alert('추가할 1차 카테고리 이름을 적어주세요.');
+        if(categories[value]) return alert('이미 존재하는 1차 카테고리입니다.');
+
+        categories[value] = []; 
+        addMainInput.value = '';
+        if(!currentMainCate) currentMainCate = value;
+        refreshCategoryUI();
+        renderMenuList();
+    }
+
+    function deleteMainCategory(main) {
+        if(!confirm(`[${main}] 카테고리를 삭제하시겠습니까?\n하위 항목 및 등록된 레시피 데이터가 함께 완전 삭제됩니다.`)) return;
+        foodData = foodData.filter(item => item.mainCate !== main);
+        delete categories[main];
+        refreshCategoryUI();
+        renderMenuList();
+    }
+
+    function addSubCategory() {
+        const targetMain = mgmtMainSelect.value;
+        if(!targetMain) return alert('1차 카테고리가 먼저 존재해야 합니다.');
+        
+        const value = addSubInput.value.trim();
+        if(!value) return alert('추가할 2차 카테고리 이름을 적어주세요.');
+        if(categories[targetMain].includes(value)) return alert('이미 존재하는 2차 카테고리입니다.');
+
+        categories[targetMain].push(value);
+        addSubInput.value = '';
+        if(!currentSubCate) currentSubCate = value;
+        refreshCategoryUI();
+        renderMenuList();
+    }
+
+    function deleteSubCategory(main, sub) {
+        if(!confirm(`[${main} > ${sub}] 카테고리를 삭제하시겠습니까?`)) return;
+        foodData = foodData.filter(item => !(item.mainCate === main && item.subCate === sub));
+        categories[main] = categories[main].filter(s => s !== sub);
+        refreshCategoryUI();
+        renderMenuList();
+    }
+
+    function renderMgmtMainList() {
+        mgmtMainList.innerHTML = '';
+        Object.keys(categories).forEach(main => {
+            const badge = document.createElement('span');
+            badge.classList.add('badge-delete');
+            badge.innerHTML = `${main} <button type="button">&times;</button>`;
+            badge.querySelector('button').addEventListener('click', () => deleteMainCategory(main));
+            mgmtMainList.appendChild(badge);
+        });
+
+        const lastSelected = mgmtMainSelect.value;
+        mgmtMainSelect.innerHTML = Object.keys(categories).map(m => `<option value="${m}">${m}</option>`).join('');
+        if (categories[lastSelected]) mgmtMainSelect.value = lastSelected;
+    }
+
+    function renderMgmtSubList() {
+        mgmtSubList.innerHTML = '';
+        const selectedMain = mgmtMainSelect.value;
+        if(!selectedMain || !categories[selectedMain]) return;
+
+        categories[selectedMain].forEach(sub => {
+            const badge = document.createElement('span');
+            badge.classList.add('badge-delete');
+            badge.innerHTML = `${sub} <button type="button">&times;</button>`;
+            badge.querySelector('button').addEventListener('click', () => deleteSubCategory(selectedMain, sub));
+            mgmtSubList.appendChild(badge);
+        });
+    }
+
+    function syncFormSelectOptions() {
+        newMainCate.innerHTML = Object.keys(categories).map(m => `<option value="${m}">${m}</option>`).join('');
+        syncSubSelectOptions(newMainCate, newSubCate);
+    }
+
+    function syncSubSelectOptions(mainSelectDOM, subSelectDOM) {
+        const mVal = mainSelectDOM.value;
+        const subs = categories[mVal] || [];
+        subSelectDOM.innerHTML = subs.map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+
+    function renderMainCategoriesNav() {
+        mainCategoriesContainer.innerHTML = '<span class="cate-label">대분류 카테고리:</span>';
+        Object.keys(categories).forEach(cate => {
+            const btn = document.createElement('button');
+            btn.classList.add('cate-btn');
+            if(cate === currentMainCate) btn.classList.add('active');
+            btn.textContent = cate;
+            
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.cate-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMainCate = cate;
+                currentSubCate = (categories[cate] && categories[cate][0]) ? categories[cate][0] : "";
+                renderSubCategoriesNav();
+                renderMenuList();
+            });
+            mainCategoriesContainer.appendChild(btn);
+        });
+    }
+
+    function renderSubCategoriesNav() {
+        subCategoriesContainer.innerHTML = '';
+        const subList = categories[currentMainCate] || [];
+        
+        subList.forEach(sub => {
+            const btn = document.createElement('button');
+            btn.classList.add('sub-btn');
+            if(sub === currentSubCate) btn.classList.add('active');
+            btn.textContent = `${sub} (${getMenuCount(currentMainCate, sub)})`;
+            
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentSubCate = sub;
+                renderMenuList();
+            });
+            subCategoriesContainer.appendChild(btn);
+        });
+    }
+
+    function getMenuCount(main, sub) {
+        return foodData.filter(item => item.mainCate === main && item.subCate === sub).length;
+    }
+
+    function renderMenuList() {
+        menuGrid.innerHTML = '';
+        const keyword = searchInput.value.toLowerCase().trim();
+
+        const filteredData = foodData.filter(item => {
+            const matchCategory = item.mainCate === currentMainCate && item.subCate === currentSubCate;
+            if (!keyword) return matchCategory;
+            return item.title.toLowerCase().includes(keyword);
+        });
+
+        if (filteredData.length === 0 || !currentMainCate) {
+            menuGrid.innerHTML = '<div class="no-result">해당 조건에 맞는 레시피 음식이 존재하지 않습니다.</div>';
+            return;
+        }
+
+        filteredData.forEach(item => {
+            const card = document.createElement('div');
+            card.classList.add('menu-card');
+            
+            card.innerHTML = `
+                <div><div class="menu-title">${item.title}</div></div>
+                <button class="recipe-view-btn">레시피보기</button>
+            `;
+            
+            card.querySelector('.recipe-view-btn').addEventListener('click', () => openModal(item));
+            menuGrid.appendChild(card);
+        });
+    }
+
+    function handleModalDelete() {
+        if (!editingItemId) return;
+        
+        const item = foodData.find(i => i.id === editingItemId);
+        if (!item) return;
+
+        if (!confirm(`현재 확인 중인 [${item.title}] 메뉴를 완전히 삭제하시겠습니까?`)) return;
+        
+        foodData = foodData.filter(f => f.id !== editingItemId);
+        
+        closeModal();
+        refreshCategoryUI();
+        renderMenuList();
+    }
+
+    function openModal(item) {
+        editingItemId = item.id;
+        isEditMode = false;
+        editActionBtn.textContent = "수정";
+        editActionBtn.classList.remove('save-mode');
+        
+        modalDeleteBtn.style.display = 'inline-block'; 
+        
+        setModalViewMode(item);
+        recipeModal.style.display = 'flex';
+    }
+
+    function setModalViewMode(item) {
+        modalTitleArea.innerHTML = `<div class="modal-title" id="modalTitle">${item.title}</div>`;
+        modalMeta.innerHTML = `${item.mainCate} > ${item.subCate}`;
+        modalRecipeContent.innerHTML = item.recipe || "등록된 레시피 내용이 없습니다.";
+        modalRecipeContent.style.padding = "25px"; 
+    }
+
+    function toggleEditMode() {
+        const item = foodData.find(i => i.id === editingItemId);
+        if(!item) return;
+
+        if (!isEditMode) {
+            isEditMode = true;
+            editActionBtn.textContent = "저장";
+            editActionBtn.classList.add('save-mode');
+
+            modalDeleteBtn.style.display = 'none';
+
+            modalTitleArea.innerHTML = `<input type="text" class="edit-input" id="editTitleInput" value="${item.title}">`;
+            
+            let mainOptHtml = Object.keys(categories).map(m => `<option value="${m}" ${m===item.mainCate?'selected':''}>${m}</option>`).join('');
+            let subOptHtml = (categories[item.mainCate] || []).map(s => `<option value="${s}" ${s===item.subCate?'selected':''}>${s}</option>`).join('');
+            
+            modalMeta.innerHTML = `
+                <select class="edit-select" id="editMainSelect">${mainOptHtml}</select>
+                <select class="edit-select" id="editSubSelect">${subOptHtml}</select>
+            `;
+
+            const editMainSelect = document.getElementById('editMainSelect');
+            const editSubSelect = document.getElementById('editSubSelect');
+            editMainSelect.addEventListener('change', () => syncSubSelectOptions(editMainSelect, editSubSelect));
+
+            modalRecipeContent.innerHTML = `<textarea class="edit-textarea" id="editRecipeTextarea">${item.recipe || ''}</textarea>`;
+            modalRecipeContent.style.padding = "0"; 
+            
+        } else {
+            const updatedTitle = document.getElementById('editTitleInput').value.trim();
+            const updatedMain = document.getElementById('editMainSelect').value;
+            const updatedSub = document.getElementById('editSubSelect').value;
+            const updatedRecipe = document.getElementById('editRecipeTextarea').value;
+
+            if(!updatedTitle) return alert('음식 이름은 공백으로 둘 수 없습니다.');
+            if(!updatedMain || !updatedSub) return alert('카테고리가 지정되어 있어야 합니다.');
+
+            item.title = updatedTitle;
+            item.mainCate = updatedMain;
+            item.subCate = updatedSub;
+            item.recipe = updatedRecipe;
+
+            isEditMode = false;
+            editActionBtn.textContent = "수정";
+            editActionBtn.classList.remove('save-mode');
+            
+            modalDeleteBtn.style.display = 'inline-block';
+
+            currentMainCate = updatedMain;
+            currentSubCate = updatedSub;
+
+            setModalViewMode(item);
+            refreshCategoryUI();
+            renderMenuList();
+            alert('레시피 수정 사항이 성공적으로 저장되었습니다!');
+        }
+    }
+
+    function closeModal() { recipeModal.style.display = 'none'; isEditMode = false; }
+
+    function handleAddMenu() {
+        const mVal = newMainCate.value;
+        const sVal = newSubCate.value;
+        const title = newTitle.value.trim();
+        const recipeText = newRecipe.value.trim();
+
+        if(!mVal || !sVal) return alert('카테고리를 먼저 추가해 주세요.');
+        if(!title) return alert('음식 이름을 입력해주세요!');
+
+        const newFoodItem = { id: Date.now(), mainCate: mVal, subCate: sVal, title: title, recipe: recipeText };
+        foodData.push(newFoodItem);
+
+        newTitle.value = ''; newRecipe.value = '';
+        currentMainCate = mVal; currentSubCate = sVal;
+
+        refreshCategoryUI();
+        renderMenuList();
+        alert(`[${title}] 메뉴와 레시피가 정상 등록되었습니다.`);
+    }
+</script>
+
+</body>
+</html>
