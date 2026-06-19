@@ -6,7 +6,7 @@
     <title>음식 레시피 프로그램</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Malgun Gothic', sans-serif; }
-        body { padding: 20px; background-color: #f9f9f9; color: #222; font-size: 16px; font-weight: 600; } /* 전체 기본 폰트 크기 및 두께 업그레이드 */
+        body { padding: 20px; background-color: #f9f9f9; color: #222; font-size: 16px; font-weight: 600; } 
         .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         
         /* 상단 제어 단추 그룹 wrapper */
@@ -113,13 +113,11 @@
 
 <div class="container">
 
-    <!-- 상단 토글 제어 단추 그룹 -->
     <div class="toggle-mgmt-wrapper">
         <button class="toggle-mgmt-btn" id="toggleMgmtBtn">⚙️ 카테고리 설정창 열기</button>
         <button class="toggle-mgmt-btn toggle-form-btn" id="toggleFormBtn">✨ 새 음식 등록창 열기</button>
     </div>
 
-    <!-- 카테고리 설정/관리 영역 -->
     <div class="category-management" id="categoryManagementZone">
         <div class="mgmt-title">⚙️ 카테고리 실시간 관리 시스템</div>
         <div class="mgmt-row">
@@ -143,7 +141,6 @@
         </div>
     </div>
 
-    <!-- 메뉴 등록 폼 영역 -->
     <div class="add-menu-form" id="addMenuFormZone">
         <div class="form-title">✨ 새 음식 레시피 등록</div>
         <div class="form-row">
@@ -191,21 +188,29 @@
 </div>
 
 <script>
-    let foodData = [
+    // 1. 로컬스토리지 연동: 저장된 데이터가 있으면 가져오고, 없으면 기본 샘플을 세팅합니다.
+    let foodData = JSON.parse(localStorage.getItem('foodData')) || [
         { id: 1, mainCate: "라이스", subCate: "단품", title: "순살감자탕 정식", recipe: "1. 뚝배기에 준비된 순살 감자탕 육수와 고기를 넣고 끓입니다.\n2. 육수가 끓기 시작하면 파와 들깨가루를 듬뿍 얹습니다." },
         { id: 2, mainCate: "라이스", subCate: "단품", title: "소시지곱빼기 잠발라야볶음밥", recipe: "1. 팬에 기름을 두르고 소시지를 노릇하게 굽습니다.\n2. 잠발라야 소스와 밥을 볶아줍니다." },
         { id: 3, mainCate: "누들", subCate: "단품", title: "매콤 해물 짬뽕", recipe: "1. 팬에 고추기름을 두르고 야채와 해물을 볶아 불맛을 냅니다.\n2. 육수를 붓고 끓으면 면을 삶아 투하합니다." }
     ];
 
-    let categories = {
+    let categories = JSON.parse(localStorage.getItem('recipeCategories')) || {
         "라이스": ["단품", "A세트", "B세트"],
         "누들": ["단품", "세트"],
         "튀김": ["단품", "사이드"],
         "꼬치": ["단품", "세트"]
     };
 
-    let currentMainCate = "라이스";
-    let currentSubCate = "단품";
+    // 2. 브라우저 저장소 동기화 함수
+    function saveToLocalStorage() {
+        localStorage.setItem('foodData', JSON.stringify(foodData));
+        localStorage.setItem('recipeCategories', JSON.stringify(categories));
+    }
+
+    // 기본 카테고리 안전 장치 초기화
+    let currentMainCate = Object.keys(categories)[0] || "";
+    let currentSubCate = (currentMainCate && categories[currentMainCate]) ? categories[currentMainCate][0] : "";
     let editingItemId = null; 
     let isEditMode = false;   
 
@@ -317,6 +322,8 @@
         categories[value] = []; 
         addMainInput.value = '';
         if(!currentMainCate) currentMainCate = value;
+        
+        saveToLocalStorage(); // 저장
         refreshCategoryUI();
         renderMenuList();
     }
@@ -325,6 +332,8 @@
         if(!confirm(`[${main}] 카테고리를 삭제하시겠습니까?\n하위 항목 및 등록된 레시피 데이터가 함께 완전 삭제됩니다.`)) return;
         foodData = foodData.filter(item => item.mainCate !== main);
         delete categories[main];
+        
+        saveToLocalStorage(); // 저장
         refreshCategoryUI();
         renderMenuList();
     }
@@ -340,6 +349,8 @@
         categories[targetMain].push(value);
         addSubInput.value = '';
         if(!currentSubCate) currentSubCate = value;
+        
+        saveToLocalStorage(); // 저장
         refreshCategoryUI();
         renderMenuList();
     }
@@ -348,6 +359,8 @@
         if(!confirm(`[${main} > ${sub}] 카테고리를 삭제하시겠습니까?`)) return;
         foodData = foodData.filter(item => !(item.mainCate === main && item.subCate === sub));
         categories[main] = categories[main].filter(s => s !== sub);
+        
+        saveToLocalStorage(); // 저장
         refreshCategoryUI();
         renderMenuList();
     }
@@ -475,6 +488,7 @@
         
         foodData = foodData.filter(f => f.id !== editingItemId);
         
+        saveToLocalStorage(); // 저장
         closeModal();
         refreshCategoryUI();
         renderMenuList();
@@ -550,6 +564,7 @@
             currentMainCate = updatedMain;
             currentSubCate = updatedSub;
 
+            saveToLocalStorage(); // 저장
             setModalViewMode(item);
             refreshCategoryUI();
             renderMenuList();
@@ -574,6 +589,7 @@
         newTitle.value = ''; newRecipe.value = '';
         currentMainCate = mVal; currentSubCate = sVal;
 
+        saveToLocalStorage(); // 저장
         refreshCategoryUI();
         renderMenuList();
         alert(`[${title}] 메뉴와 레시피가 정상 등록되었습니다.`);
